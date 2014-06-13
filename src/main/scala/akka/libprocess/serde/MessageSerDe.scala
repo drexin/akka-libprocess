@@ -4,7 +4,7 @@ import scala.util.Try
 
 trait MessageSerDe {
   def deserialize(message: TransportMessage): Try[AnyRef]
-  def serialize(obj: Any): Try[TransportMessage]
+  def serialize(obj: AnyRef): Try[TransportMessage]
 }
 
 case class TransportMessage(messageName: String, data: Array[Byte])

@@ -2,7 +2,6 @@ package akka.libprocess
 
 import akka.actor._
 import com.typesafe.config.Config
-import com.google.protobuf.MessageLite
 import akka.libprocess.LibProcessHTTPEndpoint.Started
 import java.net.InetSocketAddress
 import akka.libprocess.serde.MessageSerDe
@@ -120,4 +119,4 @@ object LibProcessManager {
   case class RetrievalFailed(pid: PID)
 }
 
-case class LibProcessMessage(sender: String, msg: MessageLite)
+case class LibProcessMessage(sender: String, msg: AnyRef)

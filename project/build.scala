@@ -1,95 +1,26 @@
+import sbt.Keys._
 import sbt._
-import Keys._
-import sbtprotobuf.{ProtobufPlugin=>PB}
+import sbtprotobuf.{ProtobufPlugin => PB}
 
 object AkkaLibprocessBuild extends Build {
-
-//////////////////////////////////////////////////////////////////////////////
-// PROJECT INFO
-//////////////////////////////////////////////////////////////////////////////
-
-  val ORGANIZATION    = "akka.libprocess"
-  val PROJECT_NAME    = "akka-libprocess"
-  val PROJECT_VERSION = "0.1.0"
-  val SCALA_VERSION   = "2.10.4"
-
-
-//////////////////////////////////////////////////////////////////////////////
-// DEPENDENCY VERSIONS
-//////////////////////////////////////////////////////////////////////////////
-
-  val MESOS_VERSION           = "0.18.0"
-  val AKKA_VERSION            = "2.3.3"
-  val TYPESAFE_CONFIG_VERSION = "1.0.2"
-  val SCALATEST_VERSION       = "2.1.3"
-  val SLF4J_VERSION           = "1.7.2"
-  val LOGBACK_VERSION         = "1.0.9"
-  val PROTOBUF_VERSION        = "2.5.0"
-
-
-//////////////////////////////////////////////////////////////////////////////
-// NATIVE LIBRARY PATHS
-//////////////////////////////////////////////////////////////////////////////
-
-  val pathToMesosLibs = "/usr/local/lib"
-
-
-//////////////////////////////////////////////////////////////////////////////
-// PROJECTS
-//////////////////////////////////////////////////////////////////////////////
+  val ProjectName    = "akka-libprocess"
 
   lazy val root = Project(
-    id = PROJECT_NAME,
+    id = ProjectName,
     base = file("."),
-    settings = commonSettings
-  ) dependsOn (
-    core, messages
-  ) aggregate (
-    core, messages
-  )
-
-  def subproject(suffix: String) = s"${PROJECT_NAME}-$suffix"
-
-  lazy val core = Project(
-    id = subproject("core"),
-    base = file("core"),
-    settings = commonSettings
-  ) dependsOn(messages)
-
-  lazy val messages = Project(
-    id = subproject("messages"),
-    base = file("messages"),
-    settings = commonSettings ++ PB.protobufSettings ++ Seq(
-      javaSource in PB.protobufConfig <<= (sourceDirectory in Compile)(_ / "java")
+    settings = Defaults.defaultSettings ++ baseSettings ++ Seq(
+      libraryDependencies := Dependencies.core
     )
   )
 
-//////////////////////////////////////////////////////////////////////////////
-// SHARED SETTINGS
-//////////////////////////////////////////////////////////////////////////////
-
-  lazy val commonSettings = Defaults.defaultSettings ++
-                            basicSettings
-
-  lazy val basicSettings = Seq(
-    version := PROJECT_VERSION,
-    organization := ORGANIZATION,
-    scalaVersion := SCALA_VERSION,
+  lazy val baseSettings = Seq(
+    version := "0.1.0",
+    organization := "akka.libprocess",
+    scalaVersion := "2.10.4",
 
     resolvers ++= Seq(
       "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
       "Spray Repository" at "http://repo.spray.io/"
-    ),
-
-    libraryDependencies ++= Seq(
-      "com.typesafe"       % "config"          % TYPESAFE_CONFIG_VERSION  % "compile",
-      "org.slf4j"          % "slf4j-api"       % SLF4J_VERSION            % "compile",
-      "com.typesafe.akka" %% "akka-actor"      % AKKA_VERSION             % "compile",
-      "com.typesafe.akka" %% "akka-testkit"    % AKKA_VERSION             % "compile",
-      "ch.qos.logback"     % "logback-classic" % LOGBACK_VERSION          % "compile",
-      "org.scalatest"     %% "scalatest"       % SCALATEST_VERSION        % "compile",
-      "com.google.protobuf" % "protobuf-java"  % PROTOBUF_VERSION         % "compile",
-      "io.spray"            % "spray-can"      % "1.3.1"                  % "compile"
     ),
 
     scalacOptions in Compile ++= Seq(
@@ -98,13 +29,40 @@ object AkkaLibprocessBuild extends Build {
       "-feature"
     ),
 
-    javaOptions += "-Djava.library.path=%s:%s".format(
-      sys.props("java.library.path"),
-      pathToMesosLibs
-    ),
-
     fork in Test := true
   )
 }
 
-// vim: set ts=4 sw=4 et:
+object Dependencies {
+  import Dependency._
+
+  val core = Seq(
+    config      % "compile",
+    slf4j       % "compile",
+    akkaActor   % "compile",
+    logback     % "compile",
+    sprayCan    % "compile"
+  )
+}
+
+object Dependency {
+  object V {
+    val Akka            = "2.3.3"
+    val Config          = "1.0.2"
+    val ScalaTest       = "2.1.3"
+    val Slf4j           = "1.7.2"
+    val Logback         = "1.0.9"
+    val Spray           = "1.3.1"
+  }
+
+  val config      = "com.typesafe"        %   "config"          % V.Config
+  val slf4j       = "org.slf4j"           %   "slf4j-api"       % V.Slf4j
+  val akkaActor   = "com.typesafe.akka"   %%  "akka-actor"      % V.Akka
+  val logback     = "ch.qos.logback"      %   "logback-classic" % V.Logback
+  val sprayCan    = "io.spray"            %   "spray-can"       % V.Spray
+
+  object Test {
+    val akkaTestKit = "com.typesafe.akka" %% "akka-testkit"    % V.Akka
+    val scalaTest   = "org.scalatest"     %% "scalatest"       % V.ScalaTest
+  }
+}

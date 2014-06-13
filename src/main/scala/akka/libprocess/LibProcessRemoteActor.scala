@@ -67,7 +67,6 @@ private [libprocess] final class LibProcessRemoteActor(name: String, address: In
     builder append ByteString(s"POST /master/$msgName HTTP/1.0\r\n")
     builder append ByteString(s"User-Agent: libprocess/${pid.toAddressString}\r\n")
     builder append ByteString("Connection: Keep-Alive\r\n")
-    builder append ByteString("Connection: Keep-Alive\r\n")
     builder append ByteString(s"Content-Length: ${data.size}\r\n")
     builder append ByteString("\r\n")
 
