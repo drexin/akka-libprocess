@@ -1,11 +1,14 @@
 package akka.libprocess
 
-import akka.io.IO
-import spray.can.Http
-import akka.actor._
+import java.net.InetSocketAddress
 
-private [libprocess] class LibProcessHTTPEndpoint(address: String, port: Int, parser: MessageParser) extends Actor with ActorLogging {
-  import LibProcessHTTPEndpoint._
+import akka.actor._
+import akka.io.IO
+import akka.libprocess.serde.MessageSerDe
+import spray.can.Http
+
+private [libprocess] class LibProcessHTTPEndpoint(address: String, port: Int, messageSerDe: MessageSerDe) extends Actor with ActorLogging {
+  import akka.libprocess.LibProcessHTTPEndpoint._
   import context.system
 
   val manager = LibProcess(system).manager
@@ -20,9 +23,9 @@ private [libprocess] class LibProcessHTTPEndpoint(address: String, port: Int, pa
 
   def receive = {
     case Http.Bound(addr) =>
-      log.info(s"Successfully bound Http endpoint to $addr.")
+      log.info(s"Successfully bound Http endpoint to ${addr}.")
       context.become(ready)
-      manager ! Started
+      manager ! Started(addr)
 
     case Http.CommandFailed(cmd: Http.Bind) =>
       log.error(s"Failed to bind Http endpoint to ${cmd.endpoint}.")
@@ -32,11 +35,11 @@ private [libprocess] class LibProcessHTTPEndpoint(address: String, port: Int, pa
   def ready: Receive = {
     case Http.Connected(remote, _) =>
       log.info(s"Incoming connection from $remote")
-      val handler = context.actorOf(Props(classOf[LibProcessHTTPHandler], parser))
+      val handler = context.actorOf(Props(classOf[LibProcessHTTPHandler], messageSerDe))
       sender() ! Http.Register(handler)
   }
 }
 
 private [libprocess] object LibProcessHTTPEndpoint {
-  case object Started
+  case class Started(address: InetSocketAddress)
 }

@@ -1,13 +1,16 @@
 package akka.libprocess
 
 import java.net.InetSocketAddress
+
 import akka.actor._
+import akka.io.Tcp.{CommandFailed, Connected, Write}
 import akka.io.{IO, Tcp}
-import akka.io.Tcp.{Write, CommandFailed, Connected}
-import com.google.protobuf.MessageLite
+import akka.libprocess.serde.{MessageSerDe, TransportMessage}
 import akka.util.ByteString
 
-private [libprocess] final class LibProcessRemoteActor(name: String, address: InetSocketAddress, messageMapping: Map[Class[_], String]) extends Actor with ActorLogging with Stash {
+import scala.util.{Failure, Success}
+
+private [libprocess] final class LibProcessRemoteActor(name: String, address: InetSocketAddress, localAddress: InetSocketAddress, messageSerDe: MessageSerDe) extends Actor with ActorLogging with Stash {
   import context.system
 
   var connection: ActorRef = _
@@ -35,30 +38,40 @@ private [libprocess] final class LibProcessRemoteActor(name: String, address: In
   }
 
   def ready: Receive = {
-    case LibProcessMessage(pid, msg) =>
-      log.info(s"$messageMapping")
-      messageMapping.get(msg.getClass) match {
-        case Some(msgType) => connection ! Write(formatMessage(pid, msgType, msg))
-        case None => log.warning(s"Could not send message with unmapped type ${msg.getClass.getName}")
+    case LibProcessMessage(senderName, msg) =>
+      messageSerDe.serialize(msg) match {
+        case Success(TransportMessage(msgName, data)) =>
+          connection ! Write(
+            formatMessage(
+              pidWithId(senderName),
+              msgName,
+              data
+            )
+          )
+
+        case Failure(e) => log.error(e, s"Could not send message")
       }
 
     case CommandFailed(cmd: Tcp.Write) =>
       log.error(s"Failed to send message to remote actor '$name' at $address.")
   }
 
-  def formatMessage(pid: PID, msgType: String, msg: MessageLite): ByteString = {
+  def pidWithId(id: String): PID = {
+    PID(localAddress.getAddress.getHostAddress, localAddress.getPort, id)
+  }
+
+  def formatMessage(pid: PID, msgName: String, data: Array[Byte]): ByteString = {
     val builder = ByteString.newBuilder
+    log.info(pid.toAddressString)
 
-    val payload = msg.toByteArray
-
-    builder append ByteString(s"POST /master/$msgType HTTP/1.0\r\n")
+    builder append ByteString(s"POST /master/$msgName HTTP/1.0\r\n")
     builder append ByteString(s"User-Agent: libprocess/${pid.toAddressString}\r\n")
     builder append ByteString("Connection: Keep-Alive\r\n")
     builder append ByteString("Connection: Keep-Alive\r\n")
-    builder append ByteString(s"Content-Length: ${payload.size}\r\n")
+    builder append ByteString(s"Content-Length: ${data.size}\r\n")
     builder append ByteString("\r\n")
 
-    builder append ByteString(payload)
+    builder append ByteString(data)
 
     builder.result()
   }

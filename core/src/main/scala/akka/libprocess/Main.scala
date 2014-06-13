@@ -1,8 +1,11 @@
 package akka.libprocess
 
 import org.apache.mesos.Protos.FrameworkInfo
-import mesos.internal.Messages.RegisterFrameworkMessage
+import mesos.internal.Messages.{FrameworkRegisteredMessage, RegisterFrameworkMessage}
 import akka.actor.{Props, ActorSystem}
+import akka.libprocess.serde.{TransportMessage, MessageSerDe}
+import scala.util.{Failure, Success, Try}
+import com.typesafe.config.Config
 
 object Main extends App {
 
@@ -21,7 +24,7 @@ object Main extends App {
   import system.dispatcher
 
   master onSuccess {
-    case x => x ! LibProcessMessage(PID("192.168.2.101", 7070, "slave"), msg)
+    case x => x ! LibProcessMessage("slave", msg)
   }
 }
 
@@ -33,3 +36,23 @@ class MyReceiver extends LibProcessActor {
       log.info(s"received $x")
   }
 }
+
+class MesosSerDe(config: Config) extends MessageSerDe {
+  override def deserialize(message: TransportMessage): Try[AnyRef] = message.messageName match {
+    case "mesos.internal.FrameworkRegisteredMessage" =>
+      Success(FrameworkRegisteredMessage.parseFrom(message.data))
+
+    case name =>
+      Failure(new ClassMappingException(s"No mapping found for message type '${name}'"))
+  }
+
+  override def serialize(obj: Any): Try[TransportMessage] = obj match {
+    case m: RegisterFrameworkMessage =>
+      Success(TransportMessage("mesos.internal.RegisterFrameworkMessage", m.toByteArray))
+
+    case _ =>
+      Failure(new ClassMappingException(s"No mapping found for class '${obj.getClass.getName}'"))
+  }
+}
+
+class ClassMappingException(msg: String) extends Exception(msg)
