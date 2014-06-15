@@ -1,6 +1,5 @@
 import sbt.Keys._
 import sbt._
-import sbtprotobuf.{ProtobufPlugin => PB}
 
 object AkkaLibprocessBuild extends Build {
   val ProjectName    = "akka-libprocess"
