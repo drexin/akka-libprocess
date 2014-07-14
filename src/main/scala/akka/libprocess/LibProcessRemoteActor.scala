@@ -33,6 +33,7 @@ private [libprocess] final class LibProcessRemoteActor(name: String, address: In
 
     case CommandFailed(cmd: Tcp.Connect) =>
       log.error(s"Failed to connect to remote libprocess at ${cmd.remoteAddress}.")
+      context.stop(self)
 
     case x => stash()
   }

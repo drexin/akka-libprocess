@@ -28,7 +28,8 @@ object AkkaLibprocessBuild extends Build {
       "-feature"
     ),
 
-    fork in Test := true
+    //fork in Test := true,
+    parallelExecution in Test := false
   )
 }
 
@@ -36,11 +37,13 @@ object Dependencies {
   import Dependency._
 
   val core = Seq(
-    config      % "compile",
-    slf4j       % "compile",
-    akkaActor   % "compile",
-    logback     % "compile",
-    sprayCan    % "compile"
+    config            % "compile",
+    slf4j             % "compile",
+    akkaActor         % "compile",
+    logback           % "compile",
+    sprayCan          % "compile",
+    Test.akkaTestKit  % "test",
+    Test.scalaTest    % "test"
   )
 }
 
