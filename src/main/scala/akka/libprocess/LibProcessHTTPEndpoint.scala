@@ -7,11 +7,9 @@ import akka.io.IO
 import akka.libprocess.serde.MessageSerDe
 import spray.can.Http
 
-private [libprocess] class LibProcessHTTPEndpoint(address: String, port: Int, messageSerDe: MessageSerDe) extends Actor with ActorLogging {
+private [libprocess] class LibProcessHTTPEndpoint(address: String, port: Int, messageSerDe: MessageSerDe, manager: ActorRef) extends Actor with ActorLogging {
   import akka.libprocess.LibProcessHTTPEndpoint._
   import context.system
-
-  val manager = LibProcess(system).manager
 
   override def preStart(): Unit = {
     IO(Http) ! Http.Bind(self, address, port)

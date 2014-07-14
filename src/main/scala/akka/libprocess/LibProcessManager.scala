@@ -25,8 +25,10 @@ class LibProcessManager(config: LibProcessConfig) extends Actor with ActorLoggin
 
   val messageSerDe = createMessageSerDe
 
-  context.watch {
-    context.actorOf(Props(classOf[LibProcessHTTPEndpoint], config.address, config.port, messageSerDe))
+  override def preStart() {
+    context.watch {
+      context.actorOf(Props(classOf[LibProcessHTTPEndpoint], config.address, config.port, messageSerDe, self))
+    }
   }
 
   var registry = Map.empty[String, ActorRef]
@@ -103,7 +105,12 @@ class LibProcessManager(config: LibProcessConfig) extends Actor with ActorLoggin
   def createMessageSerDe: MessageSerDe = {
     val cls = Class.forName(config.serDeConfig.getString("fqcn"), true, getClass.getClassLoader)
 
-    cls.getConstructor(classOf[Config]).newInstance(config.serDeConfig).asInstanceOf[MessageSerDe]
+    try {
+      cls.getConstructor(classOf[Config]).newInstance(config.serDeConfig).asInstanceOf[MessageSerDe]
+    } catch {
+      case e: NoSuchMethodException =>
+        cls.newInstance().asInstanceOf[MessageSerDe]
+    }
   }
 }
 

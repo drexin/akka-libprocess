@@ -20,7 +20,8 @@ private [libprocess] final class LibProcessRemoteActor(name: String, address: In
   }
 
   override def postStop(): Unit = {
-    IO(Tcp) ! Tcp.Close
+    if (connection != null)
+      connection ! Tcp.Close
   }
 
   def receive = {

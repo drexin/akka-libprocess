@@ -1,10 +1,10 @@
 package akka.libprocess.serde
 
-import java.io.{ByteArrayInputStream, ObjectInputStream, ObjectOutputStream, ByteArrayOutputStream}
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream, ObjectInputStream, ObjectOutputStream}
 
 import scala.util.Try
 
-object RawMessageSerDe extends MessageSerDe {
+class RawMessageSerDe extends MessageSerDe {
   override def deserialize(message: TransportMessage): Try[AnyRef] = Try {
     val bs = new ByteArrayInputStream(message.data)
     val is = new ObjectInputStream(bs)

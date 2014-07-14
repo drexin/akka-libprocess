@@ -30,7 +30,7 @@ class LibProcessRemoteActorSpec extends TestKit(ActorSystem("system")) with Word
           "test",
           new InetSocketAddress(socket.getInetAddress, socket.getLocalPort),
           new InetSocketAddress("127.0.0.1", 5051),
-          RawMessageSerDe
+          new RawMessageSerDe
         )
       )
 
@@ -56,7 +56,7 @@ class LibProcessRemoteActorSpec extends TestKit(ActorSystem("system")) with Word
           "test",
           new InetSocketAddress(socket.getInetAddress, socket.getLocalPort),
           new InetSocketAddress("127.0.0.1", 5051),
-          RawMessageSerDe
+          new RawMessageSerDe
         )
       )
 
@@ -77,7 +77,7 @@ class LibProcessRemoteActorSpec extends TestKit(ActorSystem("system")) with Word
         val body = resized.drop(expectedHeaders.size + 4)
 
         headers.toSeq should equal(expectedHeaders)
-        val deserializedBody = RawMessageSerDe.deserialize(TransportMessage("", body))
+        val deserializedBody = new RawMessageSerDe().deserialize(TransportMessage("", body))
         deserializedBody.isSuccess should be(true)
         deserializedBody.get should be("Some string")
       } finally {
