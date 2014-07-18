@@ -1,6 +1,10 @@
+/*
+ * Copyright (C) 2014 Mesosphere Inc. <http://www.mesosphere.io>
+ */
+
 package akka.libprocess
 
-import akka.actor.{Stash, ActorLogging, Actor}
+import akka.actor.{ Stash, ActorLogging, Actor }
 import akka.libprocess.LibProcessManager._
 
 trait LibProcessActor extends Actor with ActorLogging with Stash {

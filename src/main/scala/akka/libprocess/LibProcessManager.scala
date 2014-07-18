@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2014 Mesosphere Inc. <http://www.mesosphere.io>
+ */
+
 package akka.libprocess
 
 import akka.actor._
@@ -34,7 +38,6 @@ class LibProcessManager(config: LibProcessConfig) extends Actor with ActorLoggin
   var registry = Map.empty[String, ActorRef]
   var remoteRefCache = Map.empty[PID, ActorRef]
   var localAddress: InetSocketAddress = _
-
 
   override def supervisorStrategy: SupervisorStrategy = OneForOneStrategy(config.connectionRetries, config.retryTimeout) {
     case _ => Restart
@@ -76,7 +79,7 @@ class LibProcessManager(config: LibProcessConfig) extends Actor with ActorLoggin
     case GetRemoteRef(pid) =>
       getRemoteRef(pid) match {
         case Some(remoteRef) => sender() ! remoteRef
-        case None => sender() ! RetrievalFailed(pid)
+        case None            => sender() ! RetrievalFailed(pid)
       }
 
     case Terminated(ref) =>
@@ -94,7 +97,8 @@ class LibProcessManager(config: LibProcessConfig) extends Actor with ActorLoggin
           remoteRefCache += pid -> ref
           log.info(remoteRefCache.toString())
           Some(ref)
-        } catch {
+        }
+        catch {
           case e: Exception =>
             log.error(e, s"Could not create RemoteActor for PID '${pid.toAddressString}'")
             None
@@ -107,7 +111,8 @@ class LibProcessManager(config: LibProcessConfig) extends Actor with ActorLoggin
 
     try {
       cls.getConstructor(classOf[Config]).newInstance(config.serDeConfig).asInstanceOf[MessageSerDe]
-    } catch {
+    }
+    catch {
       case e: NoSuchMethodException =>
         cls.newInstance().asInstanceOf[MessageSerDe]
     }

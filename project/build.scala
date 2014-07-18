@@ -1,5 +1,11 @@
+import com.typesafe.sbt.SbtScalariform._
+import ohnosequences.sbt.SbtS3Resolver.{S3Resolver, s3, s3resolver}
+import sbtrelease.ReleasePlugin._
+import sbtbuildinfo.Plugin._
 import sbt.Keys._
 import sbt._
+
+import scalariform.formatter.preferences._
 
 object AkkaLibprocessBuild extends Build {
   val ProjectName    = "akka-libprocess"
@@ -7,13 +13,12 @@ object AkkaLibprocessBuild extends Build {
   lazy val root = Project(
     id = ProjectName,
     base = file("."),
-    settings = Defaults.defaultSettings ++ baseSettings ++ Seq(
+    settings = Defaults.defaultSettings ++ baseSettings ++ releaseSettings ++ publishSettings ++  Seq(
       libraryDependencies := Dependencies.core
     )
   )
 
-  lazy val baseSettings = Seq(
-    version := "0.1.0",
+  lazy val baseSettings = formatSettings ++ buildInfoSettings ++ Seq(
     organization := "akka.libprocess",
     scalaVersion := "2.10.4",
 
@@ -30,6 +35,32 @@ object AkkaLibprocessBuild extends Build {
 
     //fork in Test := true,
     parallelExecution in Test := false
+  )
+
+  lazy val publishSettings = S3Resolver.defaults ++ Seq(
+    publishTo := Some(s3resolver.value(
+      "Mesosphere Public Repo (S3)",
+      s3("downloads.mesosphere.io/maven")
+    ))
+  )
+
+  lazy val formatSettings = scalariformSettings ++ Seq(
+    ScalariformKeys.preferences := FormattingPreferences()
+      .setPreference(IndentWithTabs, false)
+      .setPreference(IndentSpaces, 2)
+      .setPreference(AlignParameters, true)
+      .setPreference(DoubleIndentClassDeclaration, true)
+      .setPreference(MultilineScaladocCommentsStartOnFirstLine, false)
+      .setPreference(PlaceScaladocAsterisksBeneathSecondAsterisk, true)
+      .setPreference(PreserveDanglingCloseParenthesis, true)
+      .setPreference(CompactControlReadability, true)
+      .setPreference(AlignSingleLineCaseStatements, true)
+      .setPreference(PreserveSpaceBeforeArguments, true)
+      .setPreference(SpaceBeforeColon, false)
+      .setPreference(SpaceInsideBrackets, false)
+      .setPreference(SpaceInsideParentheses, false)
+      .setPreference(SpacesWithinPatternBinders, true)
+      .setPreference(FormatXml, true)
   )
 }
 

@@ -1,16 +1,20 @@
+/*
+ * Copyright (c) 2014 Mesosphere Inc. <http://www.mesosphere.io>
+ */
+
 package akka.libprocess
 
 import java.net.InetSocketAddress
 
 import akka.actor._
-import akka.io.Tcp.{CommandFailed, Connected, Write}
-import akka.io.{IO, Tcp}
-import akka.libprocess.serde.{MessageSerDe, TransportMessage}
+import akka.io.Tcp.{ CommandFailed, Connected, Write }
+import akka.io.{ IO, Tcp }
+import akka.libprocess.serde.{ MessageSerDe, TransportMessage }
 import akka.util.ByteString
 
-import scala.util.{Failure, Success}
+import scala.util.{ Failure, Success }
 
-private [libprocess] final class LibProcessRemoteActor(name: String, address: InetSocketAddress, localAddress: InetSocketAddress, messageSerDe: MessageSerDe) extends Actor with ActorLogging with Stash {
+private[libprocess] final class LibProcessRemoteActor(name: String, address: InetSocketAddress, localAddress: InetSocketAddress, messageSerDe: MessageSerDe) extends Actor with ActorLogging with Stash {
   import context.system
 
   var connection: ActorRef = _

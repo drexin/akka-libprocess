@@ -1,13 +1,13 @@
 package akka.libprocess
 
-import java.net.{InetSocketAddress, ServerSocket}
+import java.net.{ InetSocketAddress, ServerSocket }
 
-import akka.actor.{ActorSystem, Props}
-import akka.libprocess.serde.{RawMessageSerDe, TransportMessage}
-import akka.testkit.{TestActorRef, TestKit}
-import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
+import akka.actor.{ ActorSystem, Props }
+import akka.libprocess.serde.{ RawMessageSerDe, TransportMessage }
+import akka.testkit.{ TestActorRef, TestKit }
+import org.scalatest.{ BeforeAndAfterAll, Matchers, WordSpecLike }
 
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{ Await, Future }
 import scala.concurrent.duration._
 
 class LibProcessRemoteActorSpec extends TestKit(ActorSystem("system")) with WordSpecLike with Matchers with BeforeAndAfterAll {
@@ -38,7 +38,8 @@ class LibProcessRemoteActorSpec extends TestKit(ActorSystem("system")) with Word
 
       try {
         remoteSocket.isConnected should be(true)
-      } finally {
+      }
+      finally {
         remoteSocket.close()
         socket.close()
         system.stop(testRef)
@@ -66,9 +67,9 @@ class LibProcessRemoteActorSpec extends TestKit(ActorSystem("system")) with Word
       try {
         val expectedHeaders =
           ("POST /master/java.lang.String HTTP/1.0\r\n" +
-          "User-Agent: libprocess/slave@127.0.0.1:5051\r\n" +
-          "Connection: Keep-Alive\r\n" +
-          "Content-Length: 18").getBytes.toSeq
+            "User-Agent: libprocess/slave@127.0.0.1:5051\r\n" +
+            "Connection: Keep-Alive\r\n" +
+            "Content-Length: 18").getBytes.toSeq
 
         val buffer = Array.ofDim[Byte](1024)
         val bytesRead = remoteSocket.getInputStream.read(buffer)
@@ -80,7 +81,8 @@ class LibProcessRemoteActorSpec extends TestKit(ActorSystem("system")) with Word
         val deserializedBody = new RawMessageSerDe().deserialize(TransportMessage("", body))
         deserializedBody.isSuccess should be(true)
         deserializedBody.get should be("Some string")
-      } finally {
+      }
+      finally {
         remoteSocket.close()
         socket.close()
         system.stop(testRef)

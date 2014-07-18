@@ -1,14 +1,18 @@
+/*
+ * Copyright (c) 2014 Mesosphere Inc. <http://www.mesosphere.io>
+ */
+
 package akka.libprocess
 
 import akka.actor._
 import akka.libprocess.LibProcessManager.LibProcessInternalMessage
-import akka.libprocess.serde.{MessageSerDe, TransportMessage}
+import akka.libprocess.serde.{ MessageSerDe, TransportMessage }
 import spray.can.Http
-import spray.http.{HttpResponse, HttpMethods, HttpRequest, Uri}
+import spray.http.{ HttpResponse, HttpMethods, HttpRequest, Uri }
 
-import scala.util.{Try, Failure, Success}
+import scala.util.{ Try, Failure, Success }
 
-private [libprocess] class LibProcessHTTPHandler(messageSerDe: MessageSerDe) extends Actor with ActorLogging {
+private[libprocess] class LibProcessHTTPHandler(messageSerDe: MessageSerDe) extends Actor with ActorLogging {
   val manager = LibProcess(context.system).manager
 
   val pathRegex = "/([^/]+)/(.+)".r

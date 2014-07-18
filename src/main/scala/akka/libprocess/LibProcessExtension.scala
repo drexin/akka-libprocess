@@ -1,12 +1,17 @@
+/*
+ * Copyright (c) 2014 Mesosphere Inc. <http://www.mesosphere.io>
+ */
+
 package akka.libprocess
 
+import java.util.concurrent.TimeUnit
+
 import akka.actor._
-import java.net.InetSocketAddress
-import scala.concurrent.Future
 import akka.libprocess.LibProcessManager.GetRemoteRef
 import akka.pattern.ask
 import akka.util.Timeout
-import java.util.concurrent.TimeUnit
+
+import scala.concurrent.Future
 import scala.concurrent.duration._
 
 object LibProcess extends ExtensionId[LibProcessExtension] with ExtensionIdProvider {

@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2014 Mesosphere Inc. <http://www.mesosphere.io>
+ */
+
 package akka.libprocess
 
 import java.net.InetSocketAddress
@@ -7,7 +11,7 @@ import akka.io.IO
 import akka.libprocess.serde.MessageSerDe
 import spray.can.Http
 
-private [libprocess] class LibProcessHTTPEndpoint(address: String, port: Int, messageSerDe: MessageSerDe, manager: ActorRef) extends Actor with ActorLogging {
+private[libprocess] class LibProcessHTTPEndpoint(address: String, port: Int, messageSerDe: MessageSerDe, manager: ActorRef) extends Actor with ActorLogging {
   import akka.libprocess.LibProcessHTTPEndpoint._
   import context.system
 
@@ -38,6 +42,6 @@ private [libprocess] class LibProcessHTTPEndpoint(address: String, port: Int, me
   }
 }
 
-private [libprocess] object LibProcessHTTPEndpoint {
+private[libprocess] object LibProcessHTTPEndpoint {
   case class Started(address: InetSocketAddress)
 }

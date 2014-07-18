@@ -1,6 +1,10 @@
+/*
+ * Copyright (c) 2014 Mesosphere Inc. <http://www.mesosphere.io>
+ */
+
 package akka.libprocess
 
-import scala.util.{Failure, Success, Try}
+import scala.util.{ Failure, Success, Try }
 
 class InvalidPIDException(pid: String) extends Exception(s"Invalid PID: $pid")
 
@@ -13,6 +17,6 @@ object PID {
 
   def fromAddressString(pidStr: String): Try[PID] = pidStr match {
     case addressStringRegex(id, ip, port) => Success(PID(ip, port.toInt, id))
-    case _ => Failure(new InvalidPIDException(pidStr))
+    case _                                => Failure(new InvalidPIDException(pidStr))
   }
 }

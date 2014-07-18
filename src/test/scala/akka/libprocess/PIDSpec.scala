@@ -1,6 +1,6 @@
 package akka.libprocess
 
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.{ Matchers, WordSpec }
 
 class PIDSpec extends WordSpec with Matchers {
   "A PID" should {

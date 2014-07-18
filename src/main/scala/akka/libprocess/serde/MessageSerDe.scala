@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2014 Mesosphere Inc. <http://www.mesosphere.io>
+ */
+
 package akka.libprocess.serde
 
 import scala.util.Try
